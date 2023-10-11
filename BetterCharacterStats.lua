@@ -976,7 +976,7 @@ bcsupdater:SetScript("OnEvent", function()
 			if remoteversion > localversion then
 				bcsupdateavailable = remoteversion
 				if not alreadyshown then
-					DEFAULT_CHAT_FRAME:AddMessage("|cffffffffBetterCharacterStats|r New version available! https://github.com/Gurky-Turtle/BetterCharacterStats")
+					DEFAULT_CHAT_FRAME:AddMessage("|cffffffffBetterCharacterStats|r New version available! https://github.com/Lexiebean/BetterCharacterStats")
 					alreadyshown = true
 				end
 			end
@@ -1004,7 +1004,7 @@ bcsupdater:SetScript("OnEvent", function()
 
     if event == "PLAYER_ENTERING_WORLD" then
       if not alreadyshown and localversion < remoteversion then
-        DEFAULT_CHAT_FRAME:AddMessage("|cffffffffBetterCharacterStats|r New version available! https://github.com/Gurky-Turtle/BetterCharacterStats")
+        DEFAULT_CHAT_FRAME:AddMessage("|cffffffffBetterCharacterStats|r New version available! https://github.com/Lexiebean/BetterCharacterStats")
         bcsupdateavailable = localversion
         alreadyshown = true
       end
