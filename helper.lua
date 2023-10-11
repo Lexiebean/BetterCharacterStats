@@ -218,6 +218,16 @@ function BCS:GetHitRating(hitOnly)
 						hit = hit + tonumber(value)
 						line = MAX_LINES
 					end
+					
+					-- Paladin & Shaman
+					-- Precision & Nature's Guidance
+					_,_, value = strfind(left:GetText(), "Increases your chance to hit with melee attacks and spells by (%d+)%%.")
+					local name, iconTexture, tier, column, rank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(tab, talent)
+					if value and rank > 0 then
+						hit = hit + tonumber(value)
+						line = MAX_LINES
+					end
+					
 				end	
 			end
 			
@@ -346,6 +356,15 @@ function BCS:GetSpellHitRating()
 					-- Druid
 					-- Natural Weapons
 					_,_, value = strfind(left:GetText(), "Also increases chance to hit with melee attacks and spells by (%d+)%%.")
+					local name, iconTexture, tier, column, rank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(tab, talent)
+					if value and rank > 0 then
+						hit = hit + tonumber(value)
+						line = MAX_LINES
+					end
+					
+					-- Paladin & Shaman
+					-- Precision & Nature's Guidance
+					_,_, value = strfind(left:GetText(), "Increases your chance to hit with melee attacks and spells by (%d+)%%.")
 					local name, iconTexture, tier, column, rank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(tab, talent)
 					if value and rank > 0 then
 						hit = hit + tonumber(value)
