@@ -35,6 +35,10 @@ function BCS:GetPlayerAura(searchText, auraType)
 				for line=1, MAX_LINES do
 					local left = getglobal(BCS_Prefix .. "TextLeft" .. line)
 					if left:GetText() then
+						if left:GetText() == "Power of the Guardian" and searchText == "Power of the Guardian Crit" then
+							searchText = "Increases spell critical chance by (%d)%%."
+							left = getglobal(BCS_Prefix .. "TextLeft" .. 2)
+						end
 						local value = {strfind(left:GetText(), searchText)}
 						if value[1] then
 							return unpack(value)
@@ -205,6 +209,15 @@ function BCS:GetHitRating(hitOnly)
 						talent = MAX_TALENTS
 						tab = MAX_TABS
 					end
+					
+					-- Druid
+					-- Natural Weapons
+					_,_, value = strfind(left:GetText(), "Also increases chance to hit with melee attacks and spells by (%d+)%%.")
+					local name, iconTexture, tier, column, rank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(tab, talent)
+					if value and rank > 0 then
+						hit = hit + tonumber(value)
+						line = MAX_LINES
+					end
 				end	
 			end
 			
@@ -327,6 +340,15 @@ function BCS:GetSpellHitRating()
 					local name, iconTexture, tier, column, rank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(tab, talent)
 					if value and rank > 0 then
 						hit_shadow = hit_shadow + tonumber(value)
+						line = MAX_LINES
+					end
+					
+					-- Druid
+					-- Natural Weapons
+					_,_, value = strfind(left:GetText(), "Also increases chance to hit with melee attacks and spells by (%d+)%%.")
+					local name, iconTexture, tier, column, rank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(tab, talent)
+					if value and rank > 0 then
+						hit = hit + tonumber(value)
 						line = MAX_LINES
 					end
 				end	
@@ -549,6 +571,11 @@ function BCS:GetSpellCritChance()
 						tinsert(Crit_Set_Bonus, SET_NAME)
 						spellCrit = spellCrit + tonumber(value)
 					end
+					
+					local _,_, value = strfind(left:GetText(), "(%d)%% Spell Critical Strike")
+					if value then
+						spellCrit = spellCrit + tonumber(value)
+					end
 
 				end
 			end
@@ -558,6 +585,14 @@ function BCS:GetSpellCritChance()
 	
 	-- buffs
 	local _, _, critFromAura = BCS:GetPlayerAura(L["Chance for a critical hit with a spell increased by (%d+)%%."])
+	if critFromAura then
+		spellCrit = spellCrit + tonumber(critFromAura)
+	end
+	_, _, critFromAura = BCS:GetPlayerAura("(Moonkin Aura)")
+	if critFromAura then
+		spellCrit = spellCrit + 3
+	end
+	_, _, critFromAura = BCS:GetPlayerAura("Power of the Guardian Crit")
 	if critFromAura then
 		spellCrit = spellCrit + tonumber(critFromAura)
 	end
@@ -582,7 +617,7 @@ function BCS:GetSpellCritChance()
 	if critFromAura then
 		spellCrit = spellCrit - tonumber(critFromAura)
 	end
-	
+
 	return spellCrit
 end
 
@@ -648,6 +683,10 @@ function BCS:GetSpellPower(school)
 					
 					if left:GetText() then
 						local _,_, value = strfind(left:GetText(), L["Equip: Increases damage and healing done by magical spells and effects by up to (%d+)."])
+						if value then
+							spellPower = spellPower + tonumber(value)
+						end
+						_,_, value = strfind(left:GetText(), "Equip: Increases your spell damage by up to (%d+)")
 						if value then
 							spellPower = spellPower + tonumber(value)
 						end
@@ -786,6 +825,12 @@ function BCS:GetSpellPower(school)
 			damagePower = damagePower + tonumber(spellPowerFromAura)
 		end
 		
+		_, _, spellPowerFromAura = BCS:GetPlayerAura("Increases damage and healing done by magical spells and effects by up to (%d+).")
+		if spellPowerFromAura then
+			spellPower = spellPower + tonumber(spellPowerFromAura)
+			damagePower = damagePower + tonumber(spellPowerFromAura)
+		end
+		
 		local secondaryPower = 0
 		local secondaryPowerName = ""
 		
@@ -837,6 +882,10 @@ function BCS:GetHealingPower()
 					if value then
 						healPower = healPower + tonumber(value)
 					end
+					_,_, value = strfind(left:GetText(), "Equip: Increases your spell damage by up to 120 and your healing by up to (300).")
+					if value then
+						healPower = healPower + tonumber(value) - 120
+					end
 					_,_, value = strfind(left:GetText(), L["Healing Spells %+(%d+)"])
 					if value then
 						healPower = healPower + tonumber(value)
@@ -886,6 +935,15 @@ function BCS:GetHealingPower()
 	end
     --The Eye of the Dead
     _, _, healPowerFromAura = BCS:GetPlayerAura(L["Healing spells increased by up to (%d+)."])
+	if healPowerFromAura then
+		healPower = healPower + tonumber(healPowerFromAura)
+	end
+	--Power of the Guardian
+    _, _, healPowerFromAura = BCS:GetPlayerAura("Increases healing done by magical spells and effects by up to (%d+).")
+	if healPowerFromAura then
+		healPower = healPower + tonumber(healPowerFromAura)
+	end
+	_, _, healPowerFromAura = BCS:GetPlayerAura("Increases damage and healing done by magical spells and effects by up to (%d+).")
 	if healPowerFromAura then
 		healPower = healPower + tonumber(healPowerFromAura)
 	end
@@ -941,7 +999,7 @@ function BCS:GetManaRegen()
 						mp5 = mp5 + tonumber(value)
 					end
 					_,_, value = strfind(left:GetText(), L["Equip: Restores (%d+) mana per 5 sec."])
-					if value then
+					if value and not strfind(left:GetText(), "to all party members") then
 						mp5 = mp5 + tonumber(value)
 					end
 					_,_, value = strfind(left:GetText(), L["^Healing %+%d+ and (%d+) mana per 5 sec."])
@@ -1047,6 +1105,11 @@ function BCS:GetManaRegen()
 	 _, _, castingFromAura = BCS:GetPlayerAura(L["(%d+)%% of your Mana regeneration continuing while casting."])
 	if mp5FromAura then
 		casting = casting + tonumber(castingFromAura)
+	end
+	--Power of the Guardian
+	 _, _, castingFromAura = BCS:GetPlayerAura("Restores (%d+) mana per 5 seconds.")
+	if mp5FromAura then
+		mp5 = mp5 + tonumber(mp5FromAura)
 	end
 	if casting > 100 then
 		casting = 100
