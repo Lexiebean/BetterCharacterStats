@@ -615,6 +615,10 @@ function BCS:GetSpellCritChance()
 	if critFromAura then
 		spellCrit = spellCrit + tonumber(critFromAura)
 	end
+	_, _, critFromAura = BCS:GetPlayerAura("Chance to get a critical strike with spells is increased by (%d+)%%")
+	if critFromAura then
+		spellCrit = spellCrit + tonumber(critFromAura)
+	end
 	_, _, critFromAura = BCS:GetPlayerAura(L["While active, target's critical hit chance with spells and attacks increases by 10%%."])
 	if critFromAura then
 		spellCrit = spellCrit + 10
@@ -850,6 +854,18 @@ function BCS:GetSpellPower(school)
 			damagePower = damagePower + tonumber(spellPowerFromAura)
 		end
 		
+		_, _, spellPowerFromAura = BCS:GetPlayerAura("Magical damage dealt by spells and abilities is increased by up to (%d+)")
+		if spellPowerFromAura then
+			spellPower = spellPower + tonumber(spellPowerFromAura)
+			damagePower = damagePower + tonumber(spellPowerFromAura)
+		end
+		
+		_, _, spellPowerFromAura = BCS:GetPlayerAura("Spell damage is increased by up to (%d+)")
+		if spellPowerFromAura then
+			spellPower = spellPower + tonumber(spellPowerFromAura)
+			damagePower = damagePower + tonumber(spellPowerFromAura)
+		end
+		
 		local secondaryPower = 0
 		local secondaryPowerName = ""
 		
@@ -963,6 +979,11 @@ function BCS:GetHealingPower()
 		healPower = healPower + tonumber(healPowerFromAura)
 	end
 	_, _, healPowerFromAura = BCS:GetPlayerAura("Increases damage and healing done by magical spells and effects by up to (%d+).")
+	if healPowerFromAura then
+		healPower = healPower + tonumber(healPowerFromAura)
+	end
+	--Dreamshard Elixir
+    _, _, healPowerFromAura = BCS:GetPlayerAura("Healing done is increased by up to (%d+)")
 	if healPowerFromAura then
 		healPower = healPower + tonumber(healPowerFromAura)
 	end
